@@ -1,140 +1,147 @@
-### 📘 `README.md`
+# IPL Top Players Prediction – Model Development (`IPL.ipynb`)
 
-````markdown
-# 🏏 IPL Top Players Predictor – Model Development (`IPL.ipynb`)
-
-This notebook (`IPL.ipynb`) outlines the **complete workflow for preparing IPL data**, engineering features, labeling player performance, training a machine learning model, and saving it for deployment. The final model helps predict **top-performing players** for each IPL team before a match.
+This Jupyter notebook implements a full machine learning pipeline to predict **top-performing IPL players** from the seasons **2008 to 2019**. The final goal is to identify 11 key players for any team before a match, based on their statistical performance using a Random Forest classifier.
 
 ---
 
-## 🔁 Workflow Summary (Step-by-Step)
+## Notebook Workflow – Step-by-Step
 
-### 1. **Import Required Libraries**
-The notebook starts by importing:
-- `pandas`, `numpy` for data manipulation
-- `matplotlib`, `seaborn` for visualization
-- `sklearn` modules for model training and evaluation
+### Step 1: Import Required Libraries
 
----
-
-### 2. **Load and Merge Raw Datasets**
-- `Deliveries.csv` and `Matches.csv` are loaded.
-- Merged on `match_id` to form a unified dataset with detailed match + player performance.
+- Imports essential libraries such as `pandas`, `numpy`, `seaborn`, `matplotlib`, and `sklearn`.
+- Ensures all visualization and ML tools are available.
 
 ---
 
-### 3. **Initial Data Cleaning**
-- Missing values handled (e.g., filling missing city names using venue).
-- Duplicate rows removed.
-- Data types corrected.
+###  Step 2: Load & Merge Raw Data
+
+- Loads `Deliveries.csv` and `Matches.csv`.
+- Merges the two datasets on `match_id` to form a comprehensive data frame with ball-by-ball and match-level information.
 
 ---
 
-### 4. **Player-Level Feature Extraction**
-For every match and player, the following statistics are computed:
-#### 🏏 Batting:
+###  Step 3: Preprocess Data
+
+- Filters only relevant seasons (e.g., 2008–2019).
+- Cleans missing values (e.g., missing cities imputed from venue).
+- Ensures proper data types and removes unwanted records.
+
+---
+
+###  Step 4: Create Player-Level Match Stats
+
+For each player per match, the following are calculated:
+
+#### Batting Metrics:
 - `total_runs`, `balls_faced`, `fours`, `sixes`, `strike_rate`
 
-#### 🎯 Bowling:
+#### Bowling Metrics:
 - `balls_bowled`, `runs_conceded`, `wickets`, `dot_balls`, `economy`
 
-#### 🧤 Fielding:
+#### Fielding Metrics:
 - `catches`, `run_outs`
 
-- Each player's team is also mapped using match and delivery records.
+Also maps each player to their respective team in that match.
 
 ---
 
-### 5. **Feature Engineering**
-Additional features are generated:
-- **Recent Form**: average runs and wickets in the last 3 and 5 matches
-- **Opponent Stats**: performance vs specific opponent
-- **Venue Stats**: performance at specific stadiums
-- **Career Totals**: cumulative runs and wickets
-- **Averages and Rates**: batting/bowling average, strike rate, economy
-- **Player Role Classification** (batsman, bowler, all-rounder, etc.)
+###  Step 5: Feature Engineering
+
+Adds the following **aggregated features**:
+
+- **Recent Form**: performance in last 3 and 5 matches
+- **Opponent-wise Averages**: runs/wickets vs opponent
+- **Venue-wise Averages**: performance at particular venues
+- **Career Stats**: overall runs/wickets across seasons
+- **Derived Stats**:
+  - Batting Average
+  - Bowling Average
+  - Economy
+  - Player Role (batsman, bowler, all-rounder, etc.)
 
 ---
 
-### 6. **Label Generation**
-- A **performance score** is calculated:
+### Step 6: Label Generation
+
+- A custom **performance score** is computed using:
   ```python
-  label = 1 if (batsman_runs * 1.5 + wickets * 20 + catches * 10 - economy_penalty) is high else 0
-````
+  label = 1 if (batsman_runs * 1.5 + wickets * 20 + catches * 10) - economy_penalty > threshold else 0
 
-* Players are labeled as:
+* A new `label` column is created where:
 
-  * `1`: top performer
-  * `0`: otherwise
-
----
-
-### 7. **Handle Missing Values and Outliers**
-
-* Venue-based imputation used for missing `city` values.
-* Outliers in numerical columns visualized using **boxplots** and handled using IQR or transformation.
+  * `1` = Top performer
+  * `0` = Not a top performer
 
 ---
 
-### 8. **Handle Skewness**
+###  Step 7: Handle Missing Values
 
-* Features with skewness > ±1 are transformed using:
-
-  * `PowerTransformer` (Yeo-Johnson)
-  * `log1p()` for specific columns like `sixes`, `catches`
-
----
-
-### 9. **Train/Test Split and Model Training**
-
-* `RandomForestClassifier` used to train on player statistics.
-* Train-test split performed with stratification.
-* Model evaluated using:
-
-  * `Accuracy`, `Precision`, `Recall`, `F1-Score`, `Confusion Matrix`
+* Handles missing team/city data.
+* Uses mapping strategies (e.g., filling city based on venue mode).
+* Removes or fills `NaN` values in numerical fields.
 
 ---
 
-### 10. **Model Evaluation**
+### Step 8: Outlier Detection & Removal
 
-* Feature importance plotted using `seaborn`.
-* Evaluation scores printed to verify performance (\~90%+ accuracy)
+* Uses box plots to visualize and detect outliers for:
 
----
-
-### 11. **Save Model**
-
-The trained model is saved as:
-
-```
-random_forest_top_players_model.pkl
-```
-
-
-
-## 🧾 Output Files
-
-* `Player_Stats_With_Features_HandOtl_Sk_Handl_Cleaned.csv` – Final processed data
-* `random_forest_top_players_model.pkl` – Trained model for deployment
+  * `total_runs`, `balls_faced`, `sixes`, `wickets`, `catches`, etc.
+* Optionally applies IQR filtering or manual inspection.
 
 ---
 
-## 📂 Notebook Output Flow
+### ✅ Step 9: Handle Skewness
 
-```
-├── Load + Merge Data
-├── Clean Data
-├── Extract Stats per Player
-├── Feature Engineering
-├── Label Generation
-├── Handle Missing & Skewed Data
-├── Train Random Forest Classifier
-├── Evaluate Model
-├── Export Model
-```
+* Uses `PowerTransformer` and `np.log1p()` to normalize:
+
+  * `sixes`, `wickets`, `catches`, etc.
+* Recalculates skewness and confirms improvement.
 
 ---
 
+### Step 10: Train-Test Split
 
+* Splits data into `X` (features) and `y` (labels).
+* Uses `train_test_split()` with `stratify=y`.
+
+---
+
+###  Step 11: Train Random Forest Classifier
+
+* Fits a `RandomForestClassifier` with default or tuned hyperparameters.
+* Evaluates performance using:
+
+  * Accuracy
+  * Precision
+  * Recall
+  * F1-Score
+  * Classification report
+
+---
+
+### Step 12: Feature Importance
+
+* Uses `.feature_importances_` from the trained model to rank features.
+* Plots a bar chart showing which features contribute most.
+
+---
+
+### Step 13: Save the Trained Model
+
+* Saves the model to a `.pkl` file using `joblib`:
+
+  ```python
+  joblib.dump(model, "random_forest_top_players_model.pkl")
+  ```
+
+---
+
+## 📁 Outputs Produced
+
+* `Player_Stats_With_Features_HandOtl_Sk_Handl_Cleaned.csv` – Final dataset with features and labels
+* `random_forest_top_players_model.pkl` – Trained ML model to be used in the Streamlit app
+
+---
 
 
