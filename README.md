@@ -146,38 +146,38 @@ Adds the following **aggregated features**:
 
 
 
-**IPL.py – Sequence of Steps in the Code:**
+## **IPL.py – Sequence of Steps in the Code:**
 
-Step 1: Import Required Libraries
+### Step 1: Import Required Libraries
 The script starts by importing essential Python libraries:
 
 * `streamlit` for creating the web interface.
 * `pandas` for reading and handling the dataset.
 * `joblib` for loading the pre-trained machine learning model (`RandomForestClassifier`).
 
-Step 2: Load the Dataset and the Model
+### Step 2: Load the Dataset and the Model
 Two functions are defined:
 
 * `load_data()`: loads the cleaned CSV file (`Player_Stats_With_Features_HandOtl_Sk_Handl_Cleaned.csv`) containing player-level features.
 * `load_model()`: loads the trained Random Forest model from a `.pkl` file (`random_forest_top_players_model_tuned_O_N.pkl`).
   Both are decorated with Streamlit caching to improve performance during reruns.
 
-Step 3: Configure the Streamlit App
+### Step 3: Configure the Streamlit App
 The layout of the Streamlit page is configured, and the app title is displayed: “Top Players Predictor Before Match based on 2008 to 2019 IPL Analysis”.
 
-Step 4: Team Selection
+### Step 4: Team Selection
 The user is presented with a dropdown menu containing all unique teams found in the dataset. Once the user selects a team, the dataset is filtered to only include rows corresponding to that team.
 
-Step 5: Prepare Data for Prediction
+### Step 5: Prepare Data for Prediction
 Unnecessary columns are dropped from the filtered dataset. These include columns that are not useful for prediction such as `match_id`, `date`, `venue`, and others. Only feature columns relevant for prediction are retained.
 
-Step 6: Predict Top Performers
+### Step 6: Predict Top Performers
 The filtered feature data is passed to the loaded machine learning model. The model returns a binary prediction (`1` for top performer, `0` otherwise), which is appended as a new column in the team data.
 
-Step 7: Filter Top Players and Remove Redundancy
+### Step 7: Filter Top Players and Remove Redundancy
 From the prediction results, only the rows with prediction value `1` are selected. The player entries are grouped to remove duplicates using groupby (if implemented), and average stats are aggregated across matches for each player.
 
-Step 8: Sort and Select Top 11 Players
+### Step 8: Sort and Select Top 11 Players
 The top performers are sorted based on multiple performance metrics:
 
 * High `total_runs`
@@ -186,8 +186,8 @@ The top performers are sorted based on multiple performance metrics:
 * Low `economy`
   Then, the top 11 players are selected. If fewer than 11 unique top performers exist, it displays as many as are available without duplication.
 
-Step 9: Display Results in Streamlit
+### Step 9: Display Results in Streamlit
 The final top players list is displayed in a styled table within the Streamlit app. The user can visually review the stats of predicted top performers.
 
-Step 10: Enable CSV Download
+### Step 10: Enable CSV Download
 A download button is provided, allowing the user to export the selected top player list as a `.csv` file named after the selected team.
